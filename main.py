@@ -1,35 +1,67 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
-keywords = input("Input Keyword : ")
-page = input('Input Range Page : ')
-page = int(page)
+print('--- WEB SCRAPING GO4WORLDBUSINESS ---')
+keywords = input("\nInput Keyword : ")
 
-for page in range(page):
-      url = 'https://www.go4worldbusiness.com/' \
-            f'find?searchText={keywords}&pg_buyers={page}&pg_suppliers=1&_format=html&BuyersOrSuppliers=buyers'
+# print('\nSelect a time range')
+# print('a = 3 days')
+# print('b = 7 days')
+# print('c = 30 days')
+# print('d = 60 days')
+# print('e = older than 60 days')
+#
+# daterange = input('Input Range Date : ')
+# daterange = str(daterange)
 
-      count = 0
+rangepage = input('Input Range Page : ')
+rangepage = int(rangepage)
+# data = []
+
+for page in range(1,rangepage+1):
+      url = f'https://www.go4worldbusiness.com/find?searchText={keywords}&pg_buyers={page}&pg_suppliers=1&_format=html&BuyersOrSuppliers=buyers'
+
       try:
             content = requests.get(url)
       except Exception:
             None
 
       if content.status_code == 200:
-            print('PROGRAM RUNNING')
+            # print('PROGRAM RUNNING')
 
             soup = BeautifulSoup(content.text, 'html.parser')
 
-            for buyer in soup.find_all('span', {'class':'pull-left subtitle text-capitalize'}):
-                  buyer = buyer.text.strip().split()[2]
-                  # print(buyer)
+            for result in soup.find_all('div','col-xs-12 nopadding search-results'):
 
-            for commodities in soup.find_all('div', {'class':'col-xs-12 entity-row-description-search xs-padd-lr-5'}):
-                  commodities = commodities.text.strip()
-                  # print(commodities)
+                  ######## DISPLAYING BUYER'S COUNTRY ########
+                  dbuyer = result.find('span', 'pull-left subtitle text-capitalize').text
+                  buyer = dbuyer.split()
+                  buyer = buyer[2:]
+                  buyer = ''.join(buyer)
 
-            for date in soup.find_all('div', {'class':'col-xs-3 col-sm-2 xs-padd-lr-2 nopadding'}):
-                  date = date.text.strip()
-                  print(date)
+                  ######## DISPLAYING DATE BUYING ########
+                  ddate = result.find('div', 'col-xs-3 col-sm-2 xs-padd-lr-2 nopadding').text
+                  date = ddate.strip()
 
-            count+=1
+                  print('Date : ',date, 'Country : ',buyer)
+
+                  # for commodities in soup.find_all('div', {'class': 'col-xs-12 entity-row-description-search xs-padd-lr-5'}):
+                  #       commodities = commodities.text.strip()
+                  #       # print(commodities)
+                  #
+                  #       for date in soup.find_all('div', {'class': 'col-xs-3 col-sm-2 xs-padd-lr-2 nopadding'}):
+                  #             date = date.text.strip()
+                  #             # print(date)
+
+                              # print('Buyer:', buyer, 'Date:', date)
+
+            #                   data.append({
+            #                         'Buyer': buyer,
+            #                         'Commodities': commodities,
+            #                         'Date' : date
+
+#                   })
+#
+# df = pd.DataFrame(data)
+# df.to_csv(f'{keywords}.csv', index=False, encoding='utf-8')
