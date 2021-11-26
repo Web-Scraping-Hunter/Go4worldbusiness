@@ -53,4 +53,3 @@ writer = csv.writer(open('results/{}_{}.csv'.format(keywords,rangepage),'w',newl
 writer.writerow(field)
 for d in datas: writer.writerow(d)
 
-
