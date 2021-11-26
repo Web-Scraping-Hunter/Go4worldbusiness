@@ -1,24 +1,16 @@
 import requests
 from bs4 import BeautifulSoup
-import pandas as pd
+import csv
 
-print('--- WEB SCRAPING GO4WORLDBUSINESS ---')
+print('--- WEB SCRAPING FIND BUYER ---')
+print('-- FROM WEB GO4WORLDBUSINESS --')
+print('------- by Asep Sopiyan -------')
 keywords = input("\nInput Keyword : ")
-
-# print('\nSelect a time range')
-# print('a = 3 days')
-# print('b = 7 days')
-# print('c = 30 days')
-# print('d = 60 days')
-# print('e = older than 60 days')
-#
-# daterange = input('Input Range Date : ')
-# daterange = str(daterange)
-
 rangepage = input('Input Range Page : ')
 rangepage = int(rangepage)
-# data = []
+print('\n--------- RESULT DATA ---------')
 
+datas = []
 for page in range(1,rangepage+1):
       url = f'https://www.go4worldbusiness.com/find?searchText={keywords}&pg_buyers={page}&pg_suppliers=1&_format=html&BuyersOrSuppliers=buyers'
 
@@ -33,7 +25,6 @@ for page in range(1,rangepage+1):
             soup = BeautifulSoup(content.text, 'html.parser')
 
             for result in soup.find_all('div','col-xs-12 nopadding search-results'):
-
                   ######## DISPLAYING BUYER'S COUNTRY ########
                   dbuyer = result.find('span', 'pull-left subtitle text-capitalize').text
                   buyer = dbuyer.split()
@@ -44,24 +35,19 @@ for page in range(1,rangepage+1):
                   ddate = result.find('div', 'col-xs-3 col-sm-2 xs-padd-lr-2 nopadding').text
                   date = ddate.strip()
 
-                  print('Date : ',date, 'Country : ',buyer)
+                  ######## DISPLAYING COMMODITIES ########
+                  dcommodities = result.find('h2', 'text-capitalize entity-row-title h2-item-title').text
+                  commodities = dcommodities.split()
+                  commodities = commodities[2:]
+                  commodities = ' '.join(commodities)
 
-                  # for commodities in soup.find_all('div', {'class': 'col-xs-12 entity-row-description-search xs-padd-lr-5'}):
-                  #       commodities = commodities.text.strip()
-                  #       # print(commodities)
-                  #
-                  #       for date in soup.find_all('div', {'class': 'col-xs-3 col-sm-2 xs-padd-lr-2 nopadding'}):
-                  #             date = date.text.strip()
-                  #             # print(date)
+                  datas.append([date,buyer,commodities])
 
-                              # print('Buyer:', buyer, 'Date:', date)
+                  print(date,buyer,commodities)
 
-            #                   data.append({
-            #                         'Buyer': buyer,
-            #                         'Commodities': commodities,
-            #                         'Date' : date
+field = ['Date', 'Country', 'Commodities']
+writer = csv.writer(open('results/{}_{}.csv'.format(keywords,rangepage),'w',newline=''))
+writer.writerow(field)
+for d in datas: writer.writerow(d)
 
-#                   })
-#
-# df = pd.DataFrame(data)
-# df.to_csv(f'{keywords}.csv', index=False, encoding='utf-8')
+
