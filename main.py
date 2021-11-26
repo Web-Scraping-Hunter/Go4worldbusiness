@@ -36,14 +36,17 @@ for page in range(1,rangepage+1):
                   date = ddate.strip()
 
                   ######## DISPLAYING COMMODITIES ########
-                  dcommodities = result.find('h2', 'text-capitalize entity-row-title h2-item-title').text
-                  commodities = dcommodities.split()
-                  commodities = commodities[2:]
-                  commodities = ' '.join(commodities)
+                  try :
+                        dcommodities = result.find('h2', 'text-capitalize entity-row-title h2-item-title')
+                        commodities = dcommodities.text.split()
+                        commodities = commodities[2:]
+                        commodities = ' '.join(commodities)
+                  except Exception:
+                        None
 
                   datas.append([date,buyer,commodities])
 
-                  print(date,buyer,commodities)
+                  print('Date :',date,'|','Country :',buyer,'|','Commodities :',commodities)
 
 field = ['Date', 'Country', 'Commodities']
 writer = csv.writer(open('results/{}_{}.csv'.format(keywords,rangepage),'w',newline=''))
