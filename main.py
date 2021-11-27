@@ -7,49 +7,48 @@ print('-- FROM WEB GO4WORLDBUSINESS --')
 print('------- by Asep Sopiyan -------')
 keywords = input("\nInput Keyword : ")
 rangepage = input('Input Range Page : ')
-rangepage = int(rangepage)
+
 print('\n--------- RESULT DATA ---------')
+
+keywords = keywords.replace(' ','+')
+rangepage = int(rangepage)
 
 datas = []
 for page in range(1,rangepage+1):
       url = f'https://www.go4worldbusiness.com/find?searchText={keywords}&pg_buyers={page}&pg_suppliers=1&_format=html&BuyersOrSuppliers=buyers'
+      content = requests.get(url)
 
-      try:
-            content = requests.get(url)
-      except Exception:
+      if content.status_code != 200:
+            print('!! ERROR STATUS CODE NOT : 200 !!')
+      else:
             None
 
-      if content.status_code == 200:
-            # print('PROGRAM RUNNING')
+      soup = BeautifulSoup(content.text, 'html.parser')
+      for result in soup.find_all('div', 'col-xs-12 nopadding search-results'):
+            dbuyer = result.find('span', 'pull-left subtitle text-capitalize').text
+            buyer = dbuyer.split()
+            buyer = buyer[2:]
+            buyer = ''.join(buyer)
 
-            soup = BeautifulSoup(content.text, 'html.parser')
+            ddate = result.find('div', 'col-xs-3 col-sm-2 xs-padd-lr-2 nopadding').text
+            date = ddate.strip()
 
-            for result in soup.find_all('div','col-xs-12 nopadding search-results'):
-                  ######## DISPLAYING BUYER'S COUNTRY ########
-                  dbuyer = result.find('span', 'pull-left subtitle text-capitalize').text
-                  buyer = dbuyer.split()
-                  buyer = buyer[2:]
-                  buyer = ''.join(buyer)
+            try:
+                  dcommodities = result.find('h2', 'text-capitalize entity-row-title h2-item-title').text
+                  dcommodities = dcommodities.split()
+                  commodities = dcommodities[2:]
+                  commodities = ' '.join(commodities)
 
-                  ######## DISPLAYING DATE BUYING ########
-                  ddate = result.find('div', 'col-xs-3 col-sm-2 xs-padd-lr-2 nopadding').text
-                  date = ddate.strip()
+            except AttributeError:
+                  continue
 
-                  ######## DISPLAYING COMMODITIES ########
-                  try :
-                        dcommodities = result.find('h2', 'text-capitalize entity-row-title h2-item-title')
-                        commodities = dcommodities.text.split()
-                        commodities = commodities[2:]
-                        commodities = ' '.join(commodities)
-                  except Exception:
-                        None
+            datas.append([date, buyer, commodities])
 
-                  datas.append([date,buyer,commodities])
+            print('Date :', date, '|', 'Country :', buyer, '|', 'Commodities :', commodities)
 
-                  print('Date :',date,'|','Country :',buyer,'|','Commodities :',commodities)
+
 
 field = ['Date', 'Country', 'Commodities']
 writer = csv.writer(open('results/{}_{}.csv'.format(keywords,rangepage),'w',newline=''))
 writer.writerow(field)
 for d in datas: writer.writerow(d)
-
